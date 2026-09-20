@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "decisis": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/../packages/mcp/src/server.ts"],
+      "command": "npx",
+      "args": ["-y", "@decisis/mcp@latest"],
       "env": { "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}" }
     }
   }
