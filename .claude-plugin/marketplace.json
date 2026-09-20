@@ -1,0 +1,13 @@
+{
+  "name": "decisis",
+  "owner": { "name": "Ammar Bin Ayaz" },
+  "plugins": [
+    {
+      "name": "decisis",
+      "displayName": "decisis",
+      "description": "Typed decisions for agents: classify, answer typed questions, and route work to the right model tier.",
+      "version": "0.1.0",
+      "source": "./plugin"
+    }
+  ]
+}

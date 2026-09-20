@@ -1,0 +1,10 @@
+{
+  "name": "decisis",
+  "displayName": "decisis",
+  "version": "0.1.0",
+  "description": "Typed decisions for agents: classify, answer typed questions, and route work to the right model tier - with policy you can read and a human who can always overrule.",
+  "author": { "name": "Ammar Bin Ayaz" },
+  "repository": "https://github.com/ammar-genai/decisis",
+  "license": "MIT",
+  "keywords": ["classification", "routing", "decisions", "mcp"]
+}
