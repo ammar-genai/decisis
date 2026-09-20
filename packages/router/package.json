@@ -1,0 +1,22 @@
+{
+  "name": "@decisis/router",
+  "version": "0.1.0",
+  "description": "A strong model plans, a fast model routes each task to a model tier, tasks run through the Claude Code CLI.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "jev-router": "bin/jev-router.mjs"
+  },
+  "scripts": {
+    "test": "node --test 'test/*.test.mjs'",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-include='src/**' 'test/*.test.mjs'",
+    "eval": "node eval/run-eval.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@decisis/core": "*"
+  },
+  "license": "MIT"
+}

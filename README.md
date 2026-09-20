@@ -43,8 +43,8 @@ Agents and pipelines make the same three moves over and over: *is this worth act
 | Package | What it does | Status |
 |---|---|---|
 | [`@decisis/core`](packages/core) | The decider interface, two adapters, validation, policy, overrides | **0.1.0** |
-| `@decisis/router` | A strong model plans, a fast model routes each task to a model tier, tasks run through the Claude Code CLI | next |
-| `@decisis/shadow` | Watch a system that already decides, record what the model *would* have decided, report the disagreements | next |
+| [`@decisis/router`](packages/router) | A strong model plans, a fast model routes each task to a model tier, tasks run through the Claude Code CLI | **0.1.0** |
+| [`@decisis/shadow`](packages/shadow) | Watch a system that already decides, record what the model *would* have decided, report the disagreements | **0.1.0** |
 
 ## Measured
 

@@ -1,0 +1,22 @@
+{
+  "name": "@decisis/shadow",
+  "version": "0.1.0",
+  "description": "Watch a system that already makes decisions, record what a decision model would have decided, and report the disagreements.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "jev-mate": "bin/jev-mate.mjs"
+  },
+  "scripts": {
+    "test": "node --test 'test/*.test.mjs'",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-include='src/**' 'test/*.test.mjs'",
+    "eval": "node eval/run-eval.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@decisis/core": "*"
+  },
+  "license": "MIT"
+}
