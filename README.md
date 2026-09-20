@@ -2,6 +2,8 @@
 
 **Typed decisions, deterministic policy, human override.** A model proposes; rules you can read decide; a person can always overrule. Built for the decision points inside software — routing, triage, classification, screening — where a fast, cheap, auditable answer beats a paragraph of prose.
 
+Not on npm yet — clone it and `npm install`, then import from the workspace:
+
 ```ts
 import { jevDecider, resolveChoice, levelOf } from '@decisis/core';
 
@@ -54,12 +56,13 @@ Install the plugin in Claude Code (it carries the MCP server, three commands and
 ```
 /plugin marketplace add ammar-genai/decisis
 /plugin install decisis
+cd ~/.claude/plugins/marketplaces/decisis && npm install   # once, until the packages are on npm
 ```
 
 Then `/route <task>`, `/classify <thing>`, `/triage <output>`. Any other MCP client can run the server directly:
 
 ```json
-{ "mcpServers": { "decisis": { "command": "node", "args": ["packages/mcp/src/server.ts"],
+{ "mcpServers": { "decisis": { "command": "node", "args": ["<clone>/packages/mcp/src/server.ts"],
   "env": { "OPENROUTER_API_KEY": "..." } } } }
 ```
 
