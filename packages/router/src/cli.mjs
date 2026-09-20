@@ -10,16 +10,16 @@ import { runPlan } from './run.mjs';
 import { summarize, formatSummary, priorDone } from './report.mjs';
 import { planPath, routedPath, writeJson, readJson, appendLedger, readLedger } from './store.mjs';
 
-export const USAGE = `jev-router - plan with a top model, route each task to a model tier with Jev, run with Claude Code
+export const USAGE = `decisis-router - a top model plans, a fast model routes each task to a model tier, Claude Code runs them
 
 Usage (run inside your project, or pass --project <dir>):
-  jev-router plan "<goal>"        top model reads the repo (read-only) and writes .jev-router/plan.json
-  jev-router route                Jev picks haiku|sonnet|opus per task -> .jev-router/routed.json
-  jev-router run [--dry-run] [--only t1,t3]
+  decisis-router plan "<goal>"        top model reads the repo (read-only) and writes .jev-router/plan.json
+  decisis-router route                Jev picks haiku|sonnet|opus per task -> .jev-router/routed.json
+  decisis-router run [--dry-run] [--only t1,t3]
                                   run tasks in dependency order with claude -p --model <tier>;
                                   a failed task escalates one tier; done tasks are skipped on re-run
-  jev-router report               cost by tier, escalations, rough all-on-top-model comparison
-  jev-router classify "<task>"    route one ad-hoc task description (no plan needed)
+  decisis-router report               cost by tier, escalations, rough all-on-top-model comparison
+  decisis-router classify "<task>"    route one ad-hoc task description (no plan needed)
 
 Options: --project <dir>  --json
 Config: <project>/jev-router.config.json (tiers, planner, policy, run). Key: OPENROUTER_API_KEY.
@@ -78,14 +78,14 @@ export async function run(argv, { deps = {}, log = () => {} } = {}) {
       log(`planning with ${config.planner.model} (read-only)...`);
       const plan = await makePlan({ goal, projectDir, config, runClaudeImpl: deps.runClaude });
       writeJson(planPath(projectDir), plan);
-      const text = [`plan: ${plan.tasks.length} tasks  (planner ${plan.planner.model}, $${plan.planner.costUsd.toFixed(4)})`, plan.summary, '', ...plan.tasks.map((t) => `${pad(t.id, 5)} ${t.title}${t.depends_on.length ? ` <- ${t.depends_on.join(',')}` : ''}`), '', `next: jev-router route`].join('\n');
+      const text = [`plan: ${plan.tasks.length} tasks  (planner ${plan.planner.model}, $${plan.planner.costUsd.toFixed(4)})`, plan.summary, '', ...plan.tasks.map((t) => `${pad(t.id, 5)} ${t.title}${t.depends_on.length ? ` <- ${t.depends_on.join(',')}` : ''}`), '', `next: decisis-router route`].join('\n');
       return out(plan, text);
     }
     if (cmd === 'route') {
       const plan = readJson(planPath(projectDir), 'plan');
       const routed = await routePlan({ key: key(), plan, config, decideImpl: deps.decide });
       writeJson(routedPath(projectDir), routed);
-      return out(routed, `${formatRouted(routed)}\n\nnext: review .jev-router/routed.json (edit any route.tier you disagree with), then jev-router run`);
+      return out(routed, `${formatRouted(routed)}\n\nnext: review .jev-router/routed.json (edit any route.tier you disagree with), then decisis-router run`);
     }
     if (cmd === 'classify') {
       const text = rest.join(' ').trim();
@@ -114,7 +114,7 @@ export async function run(argv, { deps = {}, log = () => {} } = {}) {
         },
       });
       const lines = Object.values(results).map((r) => `${pad(r.status, 8)} ${pad(r.id, 5)} ${pad(r.tier ?? '-', 7)} ${r.title}${r.reason ? `  (${r.reason})` : ''}${r.outOfScope?.length ? `  [REVIEW: out of scope ${r.outOfScope.join(', ')}]` : ''}`);
-      return out(results, `${dryRun ? 'dry run - nothing executed\n' : ''}${lines.join('\n')}${dryRun ? '' : '\n\nnext: jev-router report, and review the diff'}`);
+      return out(results, `${dryRun ? 'dry run - nothing executed\n' : ''}${lines.join('\n')}${dryRun ? '' : '\n\nnext: decisis-router report, and review the diff'}`);
     }
     if (cmd === 'report') {
       const s = summarize(readLedger(projectDir), config.tiers);

@@ -13,17 +13,17 @@ Needs Node ≥ 22 and no npm dependencies. The key is read from the `OPENROUTER_
 
 ```sh
 # Triage one wake from files (pane from stdin with --pane-file -)
-./bin/jev-mate.mjs triage --status "working: fixing flake" --pane-file pane.txt [--brief-file brief.md] [--idle-seconds 300] [--json]
+./bin/decisis-shadow.mjs triage --status "working: fixing flake" --pane-file pane.txt [--brief-file brief.md] [--idle-seconds 300] [--json]
 
 # Triage a live firstmate task: reads state/<id>.status, data/<id>/brief.md, and bin/fm-peek.sh <id> 60
-./bin/jev-mate.mjs triage --task <id> --fm-home ../firstmate
+./bin/decisis-shadow.mjs triage --task <id> --fm-home ../firstmate
 
 # Route a brief against dispatch rules (default rules path: $FM_HOME/config/crew-dispatch.json)
-./bin/jev-mate.mjs route --brief-file brief.md --rules eval/sample-crew-dispatch.json
+./bin/decisis-shadow.mjs route --brief-file brief.md --rules eval/sample-crew-dispatch.json
 
 # Shadow a live firstmate (read-only sidecar), then summarise
-./bin/jev-mate.mjs shadow --fm-home ../firstmate [--interval 3] [--log shadow.jsonl] [--herdr]
-./bin/jev-mate.mjs shadow-report [--log shadow.jsonl] [--json]
+./bin/decisis-shadow.mjs shadow --fm-home ../firstmate [--interval 3] [--log shadow.jsonl] [--herdr]
+./bin/decisis-shadow.mjs shadow-report [--log shadow.jsonl] [--json]
 
 npm test            # 57 unit tests, offline (fetch is faked)
 npm run coverage    # 100% lines, ~97% branches on src/
@@ -64,7 +64,7 @@ Notes:
 
 **Caveat:** I wrote both the cases and their labels, so they are cleaner than real panes. Treat the 100% as "the approach works", not as a production accuracy figure. The real test is shadow mode on live crewmates (below).
 
-## Shadow mode (`jev-mate shadow`)
+## Shadow mode (`decisis-shadow shadow`)
 
 This is a read-only sidecar, so firstmate needs no patch. It polls two files in the firstmate home every 3 s:
 
@@ -97,7 +97,7 @@ src/triage.mjs   wake triage questions + absorb/wake policy
 src/route.mjs    dispatch-rule routing (fm-dispatch-resolve question, via OpenRouter)
 src/key.mjs      key lookup (env, .env files)
 src/shadow.mjs   read-only shadow sidecar + report
-src/cli.mjs      CLI logic; bin/jev-mate.mjs is the thin entry point
+src/cli.mjs      CLI logic; bin/decisis-shadow.mjs is the thin entry point
 test/            node:test unit tests with a fake fetch
 eval/            labelled cases, sample dispatch rules, live eval runner (results-*.json gitignored)
 ```

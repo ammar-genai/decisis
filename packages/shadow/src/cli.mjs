@@ -10,19 +10,19 @@ import { triageWake } from './triage.mjs';
 import { routeTask } from './route.mjs';
 import { ShadowWatcher, summarize, formatSummary } from './shadow.mjs';
 
-export const USAGE = `jev-mate - TypeSafe Jev (via OpenRouter) as firstmate's decision layer
+export const USAGE = `decisis-shadow - record what a decision model would have decided, without acting
 
 Usage:
-  jev-mate triage --task <id> [--fm-home <dir>] [--json]
+  decisis-shadow triage --task <id> [--fm-home <dir>] [--json]
       Reads <fm-home>/state/<id>.status (last line), <fm-home>/data/<id>/brief.md and the
       pane tail via <fm-home>/bin/fm-peek.sh <id> 60.
-  jev-mate triage [--status "<line>"] [--pane-file <f|->] [--brief-file <f>] [--idle-seconds <n>] [--json]
-  jev-mate route --brief-file <f> [--rules <crew-dispatch.json>] [--project <name>] [--json]
-  jev-mate shadow [--fm-home <dir>] [--log <file.jsonl>] [--interval <sec>] [--herdr]
+  decisis-shadow triage [--status "<line>"] [--pane-file <f|->] [--brief-file <f>] [--idle-seconds <n>] [--json]
+  decisis-shadow route --brief-file <f> [--rules <crew-dispatch.json>] [--project <name>] [--json]
+  decisis-shadow shadow [--fm-home <dir>] [--log <file.jsonl>] [--interval <sec>] [--herdr]
       Read-only sidecar: for every crewmate wake firstmate delivers or absorbs, record what
       Jev would have decided. Runs until killed. Default log: jev-mate/shadow.jsonl.
       --herdr also records herdr's native agent state for the task's pane (third judge).
-  jev-mate shadow-report [--log <file.jsonl>] [--json]
+  decisis-shadow shadow-report [--log <file.jsonl>] [--json]
 
 Key: OPENROUTER_API_KEY environment variable or .env.
 Output: a firstmate-style block whose first line is "action: absorb|wake" (triage) or

@@ -3,15 +3,45 @@
   "version": "0.1.0",
   "description": "MCP server exposing typed decisions: classify, decide and route-model as tools for any agent that speaks MCP.",
   "type": "module",
-  "bin": { "decisis-mcp": "src/server.ts" },
-  "exports": { ".": "./src/server.ts" },
-  "files": ["src", "README.md"],
+  "bin": {
+    "decisis-mcp": "src/server.ts"
+  },
+  "exports": {
+    ".": "./src/server.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
   "scripts": {
     "test": "node --test --no-warnings 'test/*.test.ts'",
     "typecheck": "tsc --noEmit"
   },
   "license": "MIT",
-  "engines": { "node": ">=22" },
-  "dependencies": { "@decisis/core": "*", "@modelcontextprotocol/sdk": "^1.30.0", "zod": "^3.25.76" },
-  "devDependencies": { "typescript": "^7.0.2", "@types/node": "^26.6.2" }
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@decisis/core": "*",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "@types/node": "^26.6.2"
+  },
+  "author": "Ammar Bin Ayaz",
+  "homepage": "https://github.com/ammar-genai/decisis/tree/main/packages/mcp#readme",
+  "bugs": {
+    "url": "https://github.com/ammar-genai/decisis/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ammar-genai/decisis.git",
+    "directory": "packages/mcp"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }

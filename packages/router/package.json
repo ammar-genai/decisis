@@ -5,7 +5,7 @@
   "type": "module",
   "private": true,
   "bin": {
-    "jev-router": "bin/jev-router.mjs"
+    "decisis-router": "bin/decisis-router.mjs"
   },
   "scripts": {
     "test": "node --test 'test/*.test.mjs'",
@@ -18,5 +18,25 @@
   "dependencies": {
     "@decisis/core": "*"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "author": "Ammar Bin Ayaz",
+  "homepage": "https://github.com/ammar-genai/decisis/tree/main/packages/router#readme",
+  "bugs": {
+    "url": "https://github.com/ammar-genai/decisis/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ammar-genai/decisis.git",
+    "directory": "packages/router"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "README.md",
+    "bin",
+    "eval",
+    "src"
+  ]
 }

@@ -14,12 +14,12 @@ Needs Node ≥ 22, the `claude` CLI logged in, and `OPENROUTER_API_KEY` (env, `j
 
 ```sh
 cd your-project
-/path/to/jev-router/bin/jev-router.mjs plan "Add multi-currency pricing and fix the test script"
-/path/to/jev-router/bin/jev-router.mjs route          # review .jev-router/routed.json; edit any route.tier
-/path/to/jev-router/bin/jev-router.mjs run --dry-run  # show what would run where
-/path/to/jev-router/bin/jev-router.mjs run            # execute; re-run later to resume
-/path/to/jev-router/bin/jev-router.mjs report
-/path/to/jev-router/bin/jev-router.mjs classify "Split the orders table without downtime"   # one-off routing
+/path/to/jev-router/bin/decisis-router.mjs plan "Add multi-currency pricing and fix the test script"
+/path/to/jev-router/bin/decisis-router.mjs route          # review .jev-router/routed.json; edit any route.tier
+/path/to/jev-router/bin/decisis-router.mjs run --dry-run  # show what would run where
+/path/to/jev-router/bin/decisis-router.mjs run            # execute; re-run later to resume
+/path/to/jev-router/bin/decisis-router.mjs report
+/path/to/jev-router/bin/decisis-router.mjs classify "Split the orders table without downtime"   # one-off routing
 ```
 
 State is written to `<project>/.jev-router/`: `plan.json`, `routed.json`, and `ledger.jsonl` (one line per attempt). Add `.jev-router/` to your `.gitignore`. Nothing is committed or pushed. You review the diff.
