@@ -1,0 +1,17 @@
+{
+  "name": "@decisis/core",
+  "version": "0.1.0",
+  "description": "Typed decisions with deterministic policy and human override: ask a fast model typed questions, apply rules you can read, let a person overrule.",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "files": ["src", "README.md"],
+  "scripts": {
+    "test": "node --test --no-warnings 'test/*.test.ts'",
+    "coverage": "node --test --no-warnings --experimental-test-coverage --test-coverage-include='src/**' 'test/*.test.ts'",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["classification", "routing", "llm", "decisions", "jev", "openrouter", "human-in-the-loop"],
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "devDependencies": { "typescript": "^7.0.2", "@types/node": "^26.6.2" }
+}
