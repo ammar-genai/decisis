@@ -2,21 +2,29 @@
 /**
  * decisis MCP server: typed decisions as tools, for any agent that speaks MCP.
  *
- *   OPENROUTER_API_KEY   required
- *   DECISIS_MODEL        decision model (default: TypeSafe Jev via OpenRouter)
- *   DECISIS_LLM_MODEL    set this instead to answer with an ordinary chat model
+ *   DECISIS_DECIDER      jev (default) | claude | llm
+ *   OPENROUTER_API_KEY   required for jev and llm
+ *   DECISIS_MODEL        model for the chosen decider (jev: typesafe/jev-1.13; claude: haiku; llm: required)
+ *
+ *   With DECISIS_DECIDER=claude the server answers through the Claude Code CLI on your
+ *   subscription: no API key at all. Use DECISIS_MODEL=sonnet when the decision needs judgement.
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import { jevDecider, llmDecider, loadKey, type Decider } from '@decisis/core';
+import { jevDecider, llmDecider, claudeCodeDecider, loadKey, type Decider } from '@decisis/core';
 import { classify, decideTool, routeModel, errorResult, DEFAULT_TIERS, type ToolResult } from './tools.ts';
 
 export function deciderFromEnv(env: NodeJS.ProcessEnv = process.env): Decider {
   const key = loadKey('OPENROUTER_API_KEY', { env }) ?? undefined;
-  return env.DECISIS_LLM_MODEL
-    ? llmDecider({ key, model: env.DECISIS_LLM_MODEL, title: 'decisis-mcp' })
-    : jevDecider({ key, model: env.DECISIS_MODEL ?? undefined, title: 'decisis-mcp' });
+  const which = env.DECISIS_DECIDER ?? (env.DECISIS_LLM_MODEL ? 'llm' : 'jev');
+  if (which === 'claude') return claudeCodeDecider({ model: env.DECISIS_MODEL ?? 'haiku' });
+  if (which === 'llm') {
+    const model = env.DECISIS_MODEL ?? env.DECISIS_LLM_MODEL;
+    if (!model) throw new Error('DECISIS_DECIDER=llm needs DECISIS_MODEL');
+    return llmDecider({ key, model, title: 'decisis-mcp' });
+  }
+  return jevDecider({ key, model: env.DECISIS_MODEL ?? undefined, title: 'decisis-mcp' });
 }
 
 /** Keeps a tool's failure inside the tool result: an MCP client should see the reason, not a crash. */

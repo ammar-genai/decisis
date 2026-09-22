@@ -95,9 +95,12 @@ test('a failing decider becomes a tool error, not a crash', async () => {
   assert.equal(ok.isError, undefined);
 });
 
-test('deciderFromEnv picks the decisions model by default and an LLM when asked', async () => {
+test('deciderFromEnv picks jev by default, an LLM or Claude Code when asked', async () => {
   assert.equal(typeof deciderFromEnv({ OPENROUTER_API_KEY: 'k' }), 'function');
   assert.equal(typeof deciderFromEnv({ OPENROUTER_API_KEY: 'k', DECISIS_LLM_MODEL: 'qwen/qwen3-235b-a22b-2507' }), 'function');
+  assert.equal(typeof deciderFromEnv({ OPENROUTER_API_KEY: 'k', DECISIS_DECIDER: 'llm', DECISIS_MODEL: 'm' }), 'function');
+  assert.equal(typeof deciderFromEnv({ DECISIS_DECIDER: 'claude' }), 'function');
+  assert.throws(() => deciderFromEnv({ DECISIS_DECIDER: 'llm' }), /needs DECISIS_MODEL/);
   await assert.rejects(deciderFromEnv({})('s', { q: { type: 'noul', instructions: 'x' } }), /no API key/);
 });
 

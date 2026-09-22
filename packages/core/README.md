@@ -40,7 +40,7 @@ Agents and pipelines make the same three moves over and over: *is this worth act
 
 ## Exports
 
-`jevDecider` · `llmDecider` · `resolveChoice` · `applyFloors` · `saferOfTopTwo` · `withOverrides` · `decideOrFallback` · `validateAnswers` · `choiceOf` / `noulOf` / `scoreOf` / `levelOf` · `loadKey`
+`jevDecider` · `llmDecider` · `claudeCodeDecider` · `resolveChoice` · `applyFloors` · `saferOfTopTwo` · `withOverrides` · `decideOrFallback` · `validateAnswers` · `choiceOf` / `noulOf` / `scoreOf` / `levelOf` · `loadKey`
 
 ## Packages
 

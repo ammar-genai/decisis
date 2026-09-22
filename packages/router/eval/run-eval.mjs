@@ -2,17 +2,27 @@
 // under-route (weaker model than needed)? Costs ~$0.001 per run. Usage: node eval/run-eval.mjs [--runs N] [--verbose]
 import { writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
-import { loadKey } from '../src/key.mjs';
+import { loadKey, claudeCodeDecider, llmDecider } from '@decisis/core';
 import { DEFAULT_CONFIG } from '../src/config.mjs';
 import { routeTask } from '../src/route.mjs';
 import cases, { PROJECT } from './tasks.mjs';
 
-const { values: v } = parseArgs({ options: { runs: { type: 'string' }, verbose: { type: 'boolean' } } });
+const { values: v } = parseArgs({ options: { runs: { type: 'string' }, verbose: { type: 'boolean' }, decider: { type: 'string' }, concurrency: { type: 'string' } } });
+// --decider jev (default) | claude:<model> (Claude Code CLI, no key needed) | llm:<openrouter model>
+const which = v.decider ?? 'jev';
 const RUNS = Number(v.runs ?? 1);
-const key = loadKey();
-if (!key) {
+const key = loadKey('OPENROUTER_API_KEY', { files: [new URL('../.env', import.meta.url).pathname, new URL('../../../.env', import.meta.url).pathname] });
+if (!key && !which.startsWith('claude')) {
   console.error('No OPENROUTER_API_KEY found.');
   process.exit(1);
+}
+const decideImpl = which.startsWith('claude:') ? claudeCodeDecider({ model: which.slice(7) }) : which.startsWith('llm:') ? llmDecider({ key, model: which.slice(4) }) : undefined;
+const CONCURRENCY = Number(v.concurrency ?? (which.startsWith('claude') ? 4 : 30));
+async function mapLimit(items, n, fn) {
+  const out = new Array(items.length);
+  let i = 0;
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => { while (i < items.length) { const k = i++; out[k] = await fn(items[k]); } }));
+  return out;
 }
 const tiers = DEFAULT_CONFIG.tiers;
 const rank = (t) => tiers.indexOf(t);
@@ -26,7 +36,7 @@ function grade(tier, c) {
 
 const rows = [];
 for (let run = 1; run <= RUNS; run++) {
-  const out = await Promise.all(cases.map((c) => routeTask({ key, task: c.task, plan: PROJECT, config: DEFAULT_CONFIG })));
+  const out = await mapLimit(cases, CONCURRENCY, (c) => routeTask({ key, task: c.task, plan: PROJECT, config: DEFAULT_CONFIG, decideImpl }));
   out.forEach((r, i) => rows.push({ run, c: cases[i], r }));
 }
 
@@ -38,7 +48,7 @@ const jev = tally((r) => r.jevTier ?? r.tier);
 const fin = tally((r) => r.tier);
 const cost = (pick) => rows.reduce((s, { r }) => s + PRICE[pick(r)], 0);
 
-console.log(`\n=== Routing eval: ${cases.length} tasks x ${RUNS} run(s) ===`);
+console.log(`\n=== Routing eval: ${cases.length} tasks x ${RUNS} run(s) · decider: ${which} ===`);
 for (const { run, c, r } of rows) {
   const g = grade(r.tier, c);
   if (v.verbose || g !== 'ok' || RUNS === 1)

@@ -38,7 +38,7 @@ Agents and pipelines make the same three moves over and over: *is this worth act
 - **Typed questions.** A probability, one option from a fixed set, or a level on an ordered scale. Nothing free-form to parse.
 - **Policy you can read.** A model's answer is a proposal. Floors, confidence handling and fallbacks are ordinary code with recorded reasons — and they only ever move a decision towards the *safer* end of a ladder.
 - **Human override.** Machine answer, human override, final answer. The rules re-run from the final answer, so a review changes the outcome instead of arguing with it.
-- **Model-agnostic.** TypeSafe Jev through OpenRouter, or any chat model through structured outputs. Same questions, same policy, so you can measure one against the other.
+- **Model-agnostic.** TypeSafe Jev through OpenRouter, any chat model through structured outputs, or **the Claude Code CLI on a plain subscription with no API key**. Same questions, same policy, so you can measure one against the other.
 
 ## Packages
 
@@ -77,7 +77,28 @@ Same question, same state, one interface, two deciders — "split the orders tab
 | Jev 1.13 | **opus** | High | 498 ms | $0.000019 |
 | Qwen 3 235B | sonnet | Medium | 3,182 ms | $0.000032 |
 
-The decisions model was right, six times faster and cheaper. Through the MCP server, live: a CI failure reading "connection reset talking to the artifact registry" classified as `infra` in 300 ms for $0.000015; "add a /health endpoint with a test" routed to `sonnet` in 374 ms. On a 30-task labelled routing set (in `@decisis/router`), Jev plus the floor policy scored 90/90 acceptable with **zero under-routing**, at 49% of the cost of sending everything to the strongest model. Labels are hand-written; re-run them yourself with the packaged evaluation sets.
+The decisions model was right, six times faster and cheaper.
+
+The same 30-task routing set, three deciders, one policy (`packages/router/eval`, `--decider`):
+
+| Decider | Acceptable, alone | Under-routed, alone | With policy floors | Latency p50 |
+|---|---|---|---|---|
+| Jev 1.13 (OpenRouter) | 29/30 | 1 | **30/30**, 0 under | **0.3 s** |
+| Claude Code · Haiku (no key) | 22/30 | 8 | 28/30, 2 under | 12.9 s |
+| Claude Code · Sonnet (no key) | **30/30** | 0 | 30/30, 0 under | 6.5 s |
+
+Two things to take from that. The floors earn their keep: they turned Haiku's 8 under-routes into 2. And the two it could not rescue were both cases where Haiku, asked which model a task needed, confidently chose itself - a model is a poor judge of whether the work is beyond it, so if you route with the CLI, judge with a tier above the cheapest one you might pick.
+
+Through the MCP server, live: a CI failure reading "connection reset talking to the artifact registry" classified as `infra` in 300 ms for $0.000015; "add a /health endpoint with a test" routed to `sonnet` in 374 ms. On a 30-task labelled routing set (in `@decisis/router`), Jev plus the floor policy scored 90/90 acceptable with **zero under-routing**, at 49% of the cost of sending everything to the strongest model. Labels are hand-written; re-run them yourself with the packaged evaluation sets.
+
+## No API key? Use the CLI you already have
+
+```ts
+import { claudeCodeDecider } from '@decisis/core';
+const decide = claudeCodeDecider({ model: 'sonnet' });   // runs `claude -p --json-schema ...`
+```
+
+It costs no money, only your plan's usage window (each call carries Claude Code's own prompt overhead), and it takes seconds rather than milliseconds. For the MCP server: `DECISIS_DECIDER=claude DECISIS_MODEL=sonnet`.
 
 ## When not to use this
 

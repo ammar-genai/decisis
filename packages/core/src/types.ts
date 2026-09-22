@@ -22,6 +22,8 @@ export interface Decision {
   model: string;
   costUsd: number | null;
   latencyMs: number;
+  /** Adapters may add provenance: e.g. the Claude Code adapter's list-price equivalent and CLI timing. */
+  [extra: string]: unknown;
 }
 
 /**

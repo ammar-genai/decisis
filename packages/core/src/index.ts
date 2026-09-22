@@ -4,3 +4,4 @@ export * from './policy.ts';
 export { jevDecider, DECISIONS_URL, DEFAULT_JEV_MODEL, type JevOptions } from './jev.ts';
 export { llmDecider, schemaFor, toAnswers, SYSTEM_PROMPT, type LlmOptions } from './llm.ts';
 export { loadKey, keyFromFile } from './key.ts';
+export { claudeCodeDecider, buildArgs as claudeCodeArgs, CLAUDE_CODE_SYSTEM, type ClaudeCodeOptions } from './claudeCode.ts';

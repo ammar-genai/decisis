@@ -15,7 +15,7 @@ The plugin runs the MCP server from this repository, which needs its dependencie
 cd ~/.claude/plugins/marketplaces/decisis && npm install
 ```
 
-Set `OPENROUTER_API_KEY` in your environment before starting Claude Code.
+Set `OPENROUTER_API_KEY` in your environment before starting Claude Code - **or skip the key entirely** and let the server answer through your Claude subscription by editing the plugin's `.mcp.json` env to `{"DECISIS_DECIDER": "claude", "DECISIS_MODEL": "sonnet"}`. Slower (seconds, not milliseconds) and it draws on your plan's usage window, but nothing else to set up.
 
 Once the packages are published to npm this step goes away: the server will run with `npx -y @decisis/mcp`.
 
