@@ -16,7 +16,6 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "prepare": "npm run build",
     "prepack": "npm run build",
     "test": "node --test --no-warnings 'test/*.test.ts'",
     "coverage": "node --test --no-warnings --experimental-test-coverage --test-coverage-include='src/**' 'test/*.test.ts'",

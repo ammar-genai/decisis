@@ -19,7 +19,6 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "prepare": "npm run build",
     "prepack": "npm run build",
     "test": "node --test --no-warnings 'test/*.test.ts'",
     "typecheck": "tsc --noEmit"
