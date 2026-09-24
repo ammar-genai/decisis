@@ -13,7 +13,7 @@
     "eval": "node eval/run-eval.mjs"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.18"
   },
   "dependencies": {
     "@decisis/core": "*"

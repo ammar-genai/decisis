@@ -6,7 +6,7 @@ npm test        # every adapter takes an injectable fetch; tests never touch the
 npm run typecheck
 ```
 
-Node 22 or newer. There is no build step: the packages ship TypeScript that Node runs directly.
+Node 22.18 or newer, which is where Node began running TypeScript without a flag. There is no build step: the packages ship TypeScript that Node runs directly.
 
 A few house rules that keep this library predictable:
 

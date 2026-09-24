@@ -42,13 +42,9 @@ Agents and pipelines make the same three moves over and over: *is this worth act
 
 `jevDecider` · `llmDecider` · `claudeCodeDecider` · `resolveChoice` · `applyFloors` · `saferOfTopTwo` · `withOverrides` · `decideOrFallback` · `validateAnswers` · `choiceOf` / `noulOf` / `scoreOf` / `levelOf` · `loadKey`
 
-## Packages
+## Part of decisis
 
-| Package | What it does | Status |
-|---|---|---|
-| [`@decisis/core`](packages/core) | The decider interface, two adapters, validation, policy, overrides | **0.1.0** |
-| `@decisis/router` | A strong model plans, a fast model routes each task to a model tier, tasks run through the Claude Code CLI | next |
-| `@decisis/shadow` | Watch a system that already decides, record what the model *would* have decided, report the disagreements | next |
+This is the core library. The [repository](https://github.com/ammar-genai/decisis) also holds `@decisis/router` (a strong model plans, a fast model routes each task to a model tier), `@decisis/shadow` (record what a model *would* have decided about a system that already decides) and `@decisis/mcp` (the same decisions as MCP tools), plus a Claude Code plugin.
 
 ## Measured
 
@@ -73,6 +69,6 @@ npm test        # every adapter takes an injectable fetch: the tests never touch
 npm run typecheck
 ```
 
-Node 22+. No build step: the packages ship TypeScript that Node runs directly.
+Node 22.18 or newer, which is where Node began running TypeScript without a flag. No build step: the packages ship TypeScript that Node runs directly.
 
 MIT licensed.

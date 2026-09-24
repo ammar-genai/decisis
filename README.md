@@ -44,7 +44,7 @@ Agents and pipelines make the same three moves over and over: *is this worth act
 
 | Package | What it does | Status |
 |---|---|---|
-| [`@decisis/core`](packages/core) | The decider interface, two adapters, validation, policy, overrides | **0.1.0** |
+| [`@decisis/core`](packages/core) | The decider interface, three deciders, validation, policy, overrides | **0.1.0** |
 | [`@decisis/router`](packages/router) | A strong model plans, a fast model routes each task to a model tier, tasks run through the Claude Code CLI | **0.1.0** |
 | [`@decisis/shadow`](packages/shadow) | Watch a system that already decides, record what the model *would* have decided, report the disagreements | **0.1.0** |
 | [`@decisis/mcp`](packages/mcp) | MCP server: `classify`, `decide` and `route_model` as tools for any agent | **0.1.0** |
@@ -112,6 +112,6 @@ npm test        # every adapter takes an injectable fetch: the tests never touch
 npm run typecheck
 ```
 
-Node 22+. No build step: the packages ship TypeScript that Node runs directly.
+Node 22.18 or newer, which is where Node began running TypeScript without a flag. There is no build step: the packages ship TypeScript that Node runs directly.
 
 MIT licensed.
