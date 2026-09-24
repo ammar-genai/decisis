@@ -4,16 +4,23 @@
   "description": "MCP server exposing typed decisions: classify, decide and route-model as tools for any agent that speaks MCP.",
   "type": "module",
   "bin": {
-    "decisis-mcp": "src/server.ts"
+    "decisis-mcp": "./dist/server.js"
   },
   "exports": {
-    ".": "./src/server.ts"
+    ".": {
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
+    }
   },
   "files": [
+    "dist",
     "src",
     "README.md"
   ],
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
+    "prepack": "npm run build",
     "test": "node --test --no-warnings 'test/*.test.ts'",
     "typecheck": "tsc --noEmit"
   },
@@ -43,5 +50,7 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
-  }
+  },
+  "main": "./dist/server.js",
+  "types": "./dist/server.d.ts"
 }

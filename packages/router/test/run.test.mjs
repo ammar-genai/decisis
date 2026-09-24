@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { buildTaskPrompt, attemptOutcome, nextTier, runPlan, TASK_RESULT_SCHEMA } from '../src/run.mjs';
 import { DEFAULT_CONFIG } from '../src/config.mjs';
 import { counterfactualUsd, familyOf } from '../src/cost.mjs';
+import { priorDone } from '../src/report.mjs';
 
 const t = (id, tier, deps = []) => ({ id, title: `task ${id}`, description: 'd', files: [], depends_on: deps, acceptance: 'a', route: tier ? { tier } : undefined });
 const res = (status, over = {}) => ({ ok: true, structured: { status, summary: `${status} summary`, files_changed: ['f'], tests_run: true, tests_passed: status === 'done', notes: `${status} notes` }, costUsd: 0.1, model: 'claude-sonnet-5', numTurns: 2, durationMs: 5, permissionDenials: 0, ...over });
@@ -127,4 +128,35 @@ test('runPlan records out-of-scope edits per attempt and emits a drift event', a
   assert.deepEqual(ledger[0].outOfScope, ['test/legacy.test.js']);
   assert.deepEqual(events.find((e) => e.type === 'drift').files, ['test/legacy.test.js']);
   assert.match(buildTaskPrompt(t('a'), {}), /Do not edit existing tests to make them pass/);
+});
+
+test('a new plan reusing a task id is not skipped, and an edited task runs again', async () => {
+  // The reported symptom: an unrelated earlier "t1" made a later "t1" look already done.
+  const calls = [];
+  const fake = async (prompt) => { calls.push(prompt.match(/YOUR TASK \((\w+)\)/)[1]); return res('done'); };
+  const ledgerOld = [];
+  const oldPlan = { planId: 'plan-old', tasks: [t('t1', 'haiku')] };
+  await runPlan({ routed: oldPlan, projectDir: '.', config: DEFAULT_CONFIG, runId: 'R1', runClaudeImpl: fake, record: (e) => ledgerOld.push(e) });
+  assert.deepEqual(calls, ['t1']);
+  assert.equal(ledgerOld[0].planId, 'plan-old');
+  assert.ok(ledgerOld[0].rev, 'every entry records the task revision it was done at');
+
+  // A different plan, same task id: the work must actually run.
+  const prior = priorDone(ledgerOld, 'plan-new');
+  const events = [];
+  await runPlan({ routed: { planId: 'plan-new', tasks: [{ ...t('t1', 'haiku'), title: 'something else entirely' }] }, projectDir: '.', config: DEFAULT_CONFIG, runId: 'R2', prior, runClaudeImpl: fake, onEvent: (e) => events.push(e.type) });
+  assert.deepEqual(calls, ['t1', 't1'], 'the new plan ran its own t1');
+  assert.ok(!events.includes('already'));
+
+  // Same plan, unchanged task: resuming still skips it.
+  const skipped = [];
+  await runPlan({ routed: oldPlan, projectDir: '.', config: DEFAULT_CONFIG, runId: 'R3', prior: priorDone(ledgerOld, 'plan-old'), runClaudeImpl: fake, onEvent: (e) => skipped.push(e.type) });
+  assert.deepEqual(calls, ['t1', 't1'], 'nothing re-ran');
+  assert.ok(skipped.includes('already'));
+
+  // Same plan, but the task itself changed: it is new work.
+  const changed = [];
+  await runPlan({ routed: { planId: 'plan-old', tasks: [{ ...t('t1', 'haiku'), description: 'rewritten' }] }, projectDir: '.', config: DEFAULT_CONFIG, runId: 'R4', prior: priorDone(ledgerOld, 'plan-old'), runClaudeImpl: fake, onEvent: (e) => changed.push(e.type) });
+  assert.deepEqual(calls, ['t1', 't1', 't1'], 'the edited task ran again');
+  assert.ok(changed.includes('changed'));
 });

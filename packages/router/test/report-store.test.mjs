@@ -11,7 +11,22 @@ const tiers = ['haiku', 'sonnet', 'opus'];
 test('latestByTask and priorDone keep the newest outcome per task', () => {
   const ledger = [e('a', 1, 'haiku', 'failed', 0.1), e('a', 2, 'sonnet', 'done', 0.2), e('b', 1, 'haiku', 'blocked', 0.05)];
   assert.equal(latestByTask(ledger).a.status, 'done');
-  assert.deepEqual(priorDone(ledger), { a: { id: 'a', title: 'T a', status: 'done', summary: 'a done', tier: 'sonnet' } });
+  assert.deepEqual(priorDone(ledger), { a: { id: 'a', title: 'T a', status: 'done', summary: 'a done', tier: 'sonnet', rev: null } });
+});
+
+test('completions belong to a plan, so a later plan reusing a task id is not skipped', () => {
+  // The ledger spans every plan ever run in this project, and planners reuse ids like "t1".
+  const ledger = [
+    { ...e('t1', 1, 'haiku', 'done', 0.1), planId: 'oldplan', rev: 'r1' },
+    { ...e('t1', 1, 'sonnet', 'done', 0.2), planId: 'newplan', rev: 'r2' },
+  ];
+  assert.deepEqual(Object.keys(priorDone(ledger, 'oldplan')), ['t1']);
+  assert.equal(priorDone(ledger, 'oldplan').t1.rev, 'r1');
+  assert.deepEqual(priorDone(ledger, 'thirdplan'), {}, 'an unrelated plan starts clean');
+  // Entries written before plans had ids are ignored rather than trusted.
+  assert.deepEqual(priorDone([e('t1', 1, 'haiku', 'done', 0.1)], 'anyplan'), {});
+  // Without a planId the old behaviour is preserved for callers that pass nothing.
+  assert.deepEqual(Object.keys(priorDone(ledger)), ['t1']);
 });
 
 test('summarize totals cost by tier, escalations and the top-model counterfactual', () => {

@@ -1,6 +1,12 @@
 import { DecisionError, type Answers, type Questions } from './types.ts';
 
-const isProb = (x: unknown): x is number => typeof x === 'number' && x >= 0 && x <= 1;
+const isProb = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x) && x >= 0 && x <= 1;
+
+/**
+ * Membership must be an own-property test. `in` walks the prototype chain, so a model answering
+ * "toString" or "__proto__" would otherwise pass as a legitimate choice.
+ */
+const isOption = (criteria: Record<string, string>, choice: string): boolean => Object.hasOwn(criteria, choice);
 
 /**
  * Every asked question must come back with an answer of the right shape and range. A decision you
@@ -13,7 +19,7 @@ export function validateAnswers(answers: Answers | undefined | null, questions: 
     if (!a || a.type !== q.type) throw new DecisionError(`answer "${name}" is missing or is not a ${q.type}`);
     const ok =
       (a.type === 'noul' && isProb(a.noul)) ||
-      (a.type === 'choice' && q.type === 'choice' && typeof a.choice === 'string' && a.choice in q.criteria && (a.confidence === undefined || isProb(a.confidence))) ||
+      (a.type === 'choice' && q.type === 'choice' && typeof a.choice === 'string' && isOption(q.criteria, a.choice) && (a.confidence === undefined || isProb(a.confidence))) ||
       (a.type === 'score' && q.type === 'score' && typeof a.score === 'number' && a.score >= 0 && a.score <= q.criteria.length - 1);
     if (!ok) throw new DecisionError(`answer "${name}" is malformed`);
   }

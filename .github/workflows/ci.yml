@@ -16,3 +16,44 @@ jobs:
       # Tests never touch the network: every adapter takes an injectable fetch.
       - run: npm test
       - run: npm run typecheck
+
+  # The workspace can import TypeScript directly; an installed package cannot, because Node
+  # refuses to strip types under node_modules. So prove the *packed* package works from outside.
+  consumer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24.x' }
+      - run: npm ci
+      - run: npm pack --workspace @decisis/core --workspace @decisis/mcp --pack-destination /tmp/packed
+      - name: install the tarballs into a clean project and use them
+        run: |
+          mkdir -p /tmp/consumer && cd /tmp/consumer
+          npm init -y >/dev/null && npm pkg set type=module
+          npm install /tmp/packed/decisis-core-*.tgz /tmp/packed/decisis-mcp-*.tgz
+          node --input-type=module -e "
+            import { resolveChoice } from '@decisis/core';
+            const r = resolveChoice({
+              answer: { type: 'choice', choice: 'haiku', confidence: 0.9 },
+              ladder: ['haiku', 'sonnet', 'opus'],
+              floors: [{ to: 'opus', when: true, why: 'risk High' }],
+            });
+            if (r.value !== 'opus') { console.error('floor did not apply:', r); process.exit(1); }
+            console.log('packed @decisis/core imports and runs:', r.value);
+          "
+          node -e "
+            const { spawn } = require('node:child_process');
+            const p = spawn('node', ['node_modules/@decisis/mcp/dist/server.js'], { env: { ...process.env, OPENROUTER_API_KEY: 'unused' } });
+            let out = '';
+            p.stdout.on('data', d => out += d);
+            p.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'ci', version: '1' } } }) + '\n');
+            p.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list' }) + '\n');
+            setTimeout(() => {
+              p.kill();
+              for (const tool of ['classify', 'decide', 'route_model']) {
+                if (!out.includes('\"' + tool + '\"')) { console.error('packed MCP server did not offer ' + tool); process.exit(1); }
+              }
+              console.log('packed @decisis/mcp boots and offers all three tools');
+            }, 5000);
+          "

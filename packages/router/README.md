@@ -1,4 +1,8 @@
-# jev-router: a top model plans, Jev picks the model for each task
+# @decisis/router
+
+**A strong model plans, a fast model routes, the cheapest capable model does the work.** For a project big enough to have many tasks, a top model reads the repository and writes a plan; a typed decision picks the tier for each task; the Claude Code CLI runs them in dependency order. Under-routing is the expensive mistake, so the policy floors only ever raise.
+
+This package began life as `jev-router`, and its on-disk state still uses that name.
 
 For big projects, one strong model (Opus by default) plans the work. Then **TypeSafe Jev**, a fast typed-decision model reached through OpenRouter, decides for each task whether **Haiku, Sonnet or Opus** should do it. Tasks run headless through the **Claude Code CLI** (`claude -p --model <tier>`) on your own plan, with no Anthropic API key needed. A failed task escalates one tier and retries.
 
@@ -10,16 +14,16 @@ goal ──▶ plan (opus, read-only) ──▶ route (jev, ~0.3 s, ~$0.00004/ta
 
 ## Quick start
 
-Needs Node ≥ 22, the `claude` CLI logged in, and `OPENROUTER_API_KEY` (env, `jev-router/.env`, or `../jev-test/.env`).
+Needs Node 22.18 or newer, the `claude` CLI logged in, and `OPENROUTER_API_KEY` (environment, or a `.env` file beside the package).
 
 ```sh
 cd your-project
-/path/to/jev-router/bin/decisis-router.mjs plan "Add multi-currency pricing and fix the test script"
-/path/to/jev-router/bin/decisis-router.mjs route          # review .jev-router/routed.json; edit any route.tier
-/path/to/jev-router/bin/decisis-router.mjs run --dry-run  # show what would run where
-/path/to/jev-router/bin/decisis-router.mjs run            # execute; re-run later to resume
-/path/to/jev-router/bin/decisis-router.mjs report
-/path/to/jev-router/bin/decisis-router.mjs classify "Split the orders table without downtime"   # one-off routing
+decisis-router plan "Add multi-currency pricing and fix the test script"
+decisis-router route          # review .jev-router/routed.json; edit any route.tier
+decisis-router run --dry-run  # show what would run where
+decisis-router run            # execute; re-run later to resume
+decisis-router report
+decisis-router classify "Split the orders table without downtime"   # one-off routing
 ```
 
 State is written to `<project>/.jev-router/`: `plan.json`, `routed.json`, and `ledger.jsonl` (one line per attempt). Add `.jev-router/` to your `.gitignore`. Nothing is committed or pushed. You review the diff.

@@ -73,7 +73,7 @@ Live, through this server:
 | A CI failure reading "connection reset talking to the artifact registry" | `infra` | 300 ms | $0.000015 |
 | "Add a /health endpoint with a test" | `sonnet` | 374 ms | — |
 
-On a 30-task labelled routing set, Jev plus these floors scored 90/90 acceptable with zero under-routing, at 49% of the cost of sending every task to the strongest model. The set ships in [`@decisis/router`](../router) so you can re-run it yourself.
+On a 30-task labelled routing set, Jev plus these floors scored 90/90 acceptable with zero under-routing, and would have spent 49% of an all-opus run in model price units. That evaluation scores agreement with hand-written labels and does not execute the tasks, so it measures routing agreement rather than delivered outcomes or real spend. The set ships in [`@decisis/router`](../router) so you can re-run it yourself.
 
 ## Failure behaviour
 

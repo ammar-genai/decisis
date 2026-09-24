@@ -1,18 +1,30 @@
 // Summaries over the ledger (every attempt ever run in this project).
 
-/** Latest outcome per task across all runs (a later run can finish what an earlier one left). */
-export function latestByTask(ledger) {
+/**
+ * Latest outcome per task across all runs (a later run can finish what an earlier one left).
+ * Scoped to one plan: the ledger spans every plan ever run in this project, and task ids repeat.
+ */
+export function latestByTask(ledger, planId = null) {
   const out = {};
-  for (const e of ledger) out[e.task] = e;
+  for (const e of ledger) {
+    if (planId !== null && e.planId !== planId) continue;
+    out[e.task] = e;
+  }
   return out;
 }
 
-/** Tasks already done, in the shape runPlan() accepts as `prior`. */
-export function priorDone(ledger) {
+/**
+ * Tasks already done, in the shape runPlan() accepts as `prior`.
+ *
+ * Pass the current `planId`. Entries from another plan, and older entries written before plans had
+ * ids, are ignored - re-running a task costs money, but silently skipping real work costs more.
+ * Each record carries the task `rev` it was done at, so an edited task is not counted as done.
+ */
+export function priorDone(ledger, planId = null) {
   return Object.fromEntries(
-    Object.values(latestByTask(ledger))
+    Object.values(latestByTask(ledger, planId))
       .filter((e) => e.status === 'done')
-      .map((e) => [e.task, { id: e.task, title: e.title, status: 'done', summary: e.summary, tier: e.tier }]),
+      .map((e) => [e.task, { id: e.task, title: e.title, status: 'done', summary: e.summary, tier: e.tier, rev: e.rev ?? null }]),
   );
 }
 

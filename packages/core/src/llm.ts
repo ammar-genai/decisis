@@ -43,12 +43,20 @@ export function schemaFor(questions: Questions): Record<string, unknown> {
 }
 
 /** Map the model's JSON back onto typed answers (a level becomes its index on the scale). */
+/**
+ * `Number(null)` and `Number('')` are both 0, which would turn a model's missing probability into
+ * a confident "definitely not" that passes validation. Anything that is not a real number, or a
+ * non-empty numeric string, becomes NaN here so validateAnswers rejects it.
+ */
+const num = (x: unknown): number =>
+  typeof x === 'number' ? x : typeof x === 'string' && x.trim() !== '' ? Number(x) : Number.NaN;
+
 export function toAnswers(raw: Record<string, { probability?: number; choice?: string; level?: string; confidence?: number }>, questions: Questions): Answers {
   const answers: Answers = {};
   for (const [name, q] of Object.entries(questions)) {
     const r = raw?.[name];
     if (!r) continue;
-    if (q.type === 'noul') answers[name] = { type: 'noul', noul: Number(r.probability) } as Answer;
+    if (q.type === 'noul') answers[name] = { type: 'noul', noul: num(r.probability) } as Answer;
     else if (q.type === 'choice') answers[name] = { type: 'choice', choice: String(r.choice), confidence: r.confidence } as Answer;
     else {
       const index = q.criteria.indexOf(String(r.level));

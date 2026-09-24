@@ -1,4 +1,8 @@
-# jev-mate: Jev as firstmate's decision layer (prototype)
+# @decisis/shadow
+
+**Watch a system that already decides, and record what the model would have decided.** Shadow mode runs read-only beside a live system, asks the same question the system just answered, and reports the disagreements. It is how you find out whether a decision layer is worth trusting before you let it act.
+
+The worked example here is [firstmate](https://github.com/kunchenguid/firstmate), an agent that dispatches work to other agents. This package began life as `jev-mate` and kept its prototype shape.
 
 TypeSafe **Jev** (`typesafe/jev-1.13`, called through OpenRouter) makes two of firstmate's recurring decisions. Each call takes about 250 ms and costs about $0.00002.
 
@@ -9,7 +13,7 @@ This is a standalone prototype. It does **not** modify the `../firstmate` clone.
 
 ## Run it
 
-Needs Node ≥ 22 and no npm dependencies. The key is read from the `OPENROUTER_API_KEY` env var, `jev-mate/.env` or `../jev-test/.env`.
+Needs Node 22.18 or newer. The key is read from the `OPENROUTER_API_KEY` environment variable, or from a `.env` file beside the package.
 
 ```sh
 # Triage one wake from files (pane from stdin with --pane-file -)

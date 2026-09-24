@@ -35,7 +35,7 @@ Agents and pipelines make the same three moves over and over: *is this worth act
 
 - **Typed questions.** A probability, one option from a fixed set, or a level on an ordered scale. Nothing free-form to parse.
 - **Policy you can read.** A model's answer is a proposal. Floors, confidence handling and fallbacks are ordinary code with recorded reasons — and they only ever move a decision towards the *safer* end of a ladder.
-- **Human override.** Machine answer, human override, final answer. The rules re-run from the final answer, so a review changes the outcome instead of arguing with it.
+- **Human override.** `withOverrides` merges a person's corrections over the machine's answers and reports which ones they changed. Feed that result back through the same policy and a review changes the outcome instead of arguing with it. Re-running the policy and storing the audit trail are the caller's job: this library keeps the decision honest, it is not a database.
 - **Model-agnostic.** TypeSafe Jev through OpenRouter, or any chat model through structured outputs. Same questions, same policy, so you can measure one against the other.
 
 ## Exports
@@ -55,7 +55,9 @@ Same question, same state, one interface, two deciders — "split the orders tab
 | Jev 1.13 | **opus** | High | 498 ms | $0.000019 |
 | Qwen 3 235B | sonnet | Medium | 3,182 ms | $0.000032 |
 
-The decisions model was right, six times faster and cheaper. On a 30-task labelled routing set (in `@decisis/router`), Jev plus the floor policy scored 90/90 acceptable with **zero under-routing**, at 49% of the cost of sending everything to the strongest model. Labels are hand-written; re-run them yourself with the packaged evaluation sets.
+The decisions model was right, six times faster and cheaper. On a 30-task labelled routing set (in `@decisis/router`), Jev plus the floor policy scored 90/90 acceptable with **zero under-routing**, and would have spent 49% of an all-opus run in model price units.
+
+**What that number is, and is not.** The evaluation scores agreement with hand-written labels and prices the chosen tiers with fixed per-tier weights. It does not execute the tasks, so it does not measure whether the cheaper tier actually finished the work, how often a task needed a retry, or the real dollar total. Read it as a routing-agreement result. The labels are mine; re-run them yourself, or relabel them, with the packaged evaluation set.
 
 ## When not to use this
 

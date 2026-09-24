@@ -100,7 +100,7 @@ export async function run(argv, { deps = {}, log = () => {} } = {}) {
       const dryRun = !!v['dry-run'];
       const results = await runPlan({
         routed, projectDir, config, runId, only, dryRun,
-        prior: dryRun ? {} : priorDone(readLedger(projectDir)),
+        prior: dryRun ? {} : priorDone(readLedger(projectDir), routed.planId ?? null),
         runClaudeImpl: deps.runClaude,
         record: (e) => appendLedger(projectDir, e),
         onEvent: (e) => {
@@ -110,6 +110,7 @@ export async function run(argv, { deps = {}, log = () => {} } = {}) {
           if (e.type === 'skip') log(`${e.task.id} skipped: ${e.reason}`);
           if (e.type === 'drift') log(`   ! needs review: ${e.task.id} changed files outside its scope: ${e.files.join(', ')}`);
           if (e.type === 'already') log(`${e.task.id} already done in an earlier run`);
+          if (e.type === 'changed') log(`${e.task.id} ${e.reason}`);
           if (e.type === 'dry') log(`${e.task.id} would run on ${e.tier}: ${e.task.title}`);
         },
       });

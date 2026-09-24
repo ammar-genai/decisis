@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { runClaude } from './claude.mjs';
 import { topoOrder } from './plan.mjs';
 import { counterfactualUsd } from './cost.mjs';
+import { taskRevOf } from './identity.mjs';
 
 export const TASK_RESULT_SCHEMA = {
   type: 'object',
@@ -75,10 +76,13 @@ export async function runPlan({ routed, projectDir, config, runId, only = null, 
   const results = { ...prior };
   for (const task of topoOrder(routed.tasks)) {
     if (only && !only.includes(task.id)) continue;
-    if (results[task.id]?.status === 'done') {
+    const rev = taskRevOf(task);
+    const done = results[task.id];
+    if (done?.status === 'done' && (done.rev == null || done.rev === rev)) {
       onEvent({ type: 'already', task });
       continue;
     }
+    if (done?.status === 'done') onEvent({ type: 'changed', task, reason: 'the task changed since it was done; running it again' });
     const blockers = (task.depends_on ?? []).filter((d) => results[d]?.status !== 'done');
     if (blockers.length) {
       results[task.id] = { id: task.id, title: task.title, status: 'skipped', reason: `waiting on ${blockers.join(', ')}` };
@@ -110,7 +114,7 @@ export async function runPlan({ routed, projectDir, config, runId, only = null, 
       }
       outcome = attemptOutcome(r);
       const drift = outOfScope(changedFilesImpl(projectDir), before, task.files);
-      const entry = { runId, outOfScope: drift, at: new Date().toISOString(), task: task.id, title: task.title, attempt: n, tier, model: r.model, status: outcome.status, reason: outcome.reason, costUsd: r.costUsd ?? 0, topModelCostUsd: counterfactualUsd(r.costUsd ?? 0, r.model ?? tier, config.tiers.at(-1)), numTurns: r.numTurns ?? null, durationMs: r.durationMs ?? null, permissionDenials: r.permissionDenials ?? 0, summary: r.structured?.summary ?? null, filesChanged: r.structured?.files_changed ?? [] };
+      const entry = { runId, planId: routed.planId ?? null, rev, outOfScope: drift, at: new Date().toISOString(), task: task.id, title: task.title, attempt: n, tier, model: r.model, status: outcome.status, reason: outcome.reason, costUsd: r.costUsd ?? 0, topModelCostUsd: counterfactualUsd(r.costUsd ?? 0, r.model ?? tier, config.tiers.at(-1)), numTurns: r.numTurns ?? null, durationMs: r.durationMs ?? null, permissionDenials: r.permissionDenials ?? 0, summary: r.structured?.summary ?? null, filesChanged: r.structured?.files_changed ?? [] };
       attempts.push(entry);
       record(entry);
       onEvent({ type: 'attempt', task, entry });
@@ -121,7 +125,7 @@ export async function runPlan({ routed, projectDir, config, runId, only = null, 
     }
     const last = attempts.at(-1);
     const drift = [...new Set(attempts.flatMap((a) => a.outOfScope))];
-    results[task.id] = { id: task.id, title: task.title, status: outcome.status, reason: outcome.reason, summary: last.summary, tier: last.tier, attempts: attempts.length, costUsd: attempts.reduce((s, a) => s + a.costUsd, 0), outOfScope: drift };
+    results[task.id] = { id: task.id, title: task.title, rev, status: outcome.status, reason: outcome.reason, summary: last.summary, tier: last.tier, attempts: attempts.length, costUsd: attempts.reduce((s, a) => s + a.costUsd, 0), outOfScope: drift };
     if (drift.length) onEvent({ type: 'drift', task, files: drift });
   }
   return results;

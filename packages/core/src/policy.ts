@@ -70,7 +70,10 @@ export interface ResolveOptions<T extends string> {
 export function resolveChoice<T extends string>({ answer, ladder, confidenceFloor = 0.6, floors = [], fallback }: ResolveOptions<T>): Resolved<T> {
   const safest = fallback ?? ladder[ladder.length - 1];
   if (!answer || answer.type !== 'choice' || rankIn(ladder, answer.choice) < 0) {
-    return { value: safest, proposed: safest, raised: true, confidence: null, reasons: [`no usable answer; defaulting to ${safest}`] };
+    // Floors still apply. A caller who lowers the fallback is saying "start here when the model
+    // is silent", not "ignore the rails" - an always-on floor must still raise it.
+    const floored = applyFloors(safest, ladder, floors);
+    return { value: floored.value, proposed: safest, raised: true, confidence: null, reasons: [`no usable answer; defaulting to ${safest}`, ...floored.reasons] };
   }
   const proposed = answer.choice as T;
   const confidence = answer.confidence ?? null;

@@ -1,5 +1,6 @@
 // Planning: the top model reads the project (read-only) and breaks a goal into routed-ready tasks.
 import { runClaude } from './claude.mjs';
+import { planIdOf } from './identity.mjs';
 
 export const PLAN_SCHEMA = {
   type: 'object',
@@ -76,5 +77,5 @@ export async function makePlan({ goal, projectDir, config, runClaudeImpl = runCl
   );
   if (!r.ok || !r.structured) throw new Error(`planner failed (${r.subtype}): ${String(r.result).slice(0, 300)}`);
   const plan = validatePlan(r.structured);
-  return { goal, createdAt: new Date().toISOString(), planner: { model: r.model, costUsd: r.costUsd, durationMs: r.durationMs }, ...plan };
+  return { goal, planId: planIdOf(goal), createdAt: new Date().toISOString(), planner: { model: r.model, costUsd: r.costUsd, durationMs: r.durationMs }, ...plan };
 }

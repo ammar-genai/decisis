@@ -2,6 +2,7 @@
 // The policy can only move a task UP a tier, never down: under-routing (a weak model on a hard
 // task) is the expensive mistake; over-routing only costs money.
 import { jevDecider, resolveChoice, levelOf } from '@decisis/core';
+import { planIdOf } from './identity.mjs';
 
 export const TIER_CRITERIA = {
   haiku:
@@ -86,5 +87,6 @@ export async function routeTask({ key, task, plan, config, decideImpl }) {
 
 export async function routePlan({ key, plan, config, decideImpl }) {
   const routed = await Promise.all(plan.tasks.map((task) => routeTask({ key, task, plan, config, decideImpl })));
-  return { ...plan, routedAt: new Date().toISOString(), tasks: plan.tasks.map((t, i) => ({ ...t, route: routed[i] })) };
+  // planId comes from the plan; an older plan.json written before plans had ids gets one now.
+  return { ...plan, planId: plan.planId ?? planIdOf(plan.goal), routedAt: new Date().toISOString(), tasks: plan.tasks.map((t, i) => ({ ...t, route: routed[i] })) };
 }

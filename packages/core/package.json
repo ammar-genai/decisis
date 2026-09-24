@@ -4,13 +4,20 @@
   "description": "Typed decisions with deterministic policy and human override: ask a fast model typed questions, apply rules you can read, let a person overrule.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "files": [
+    "dist",
     "src",
     "README.md"
   ],
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
+    "prepack": "npm run build",
     "test": "node --test --no-warnings 'test/*.test.ts'",
     "coverage": "node --test --no-warnings --experimental-test-coverage --test-coverage-include='src/**' 'test/*.test.ts'",
     "typecheck": "tsc --noEmit"
@@ -45,5 +52,7 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
-  }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts"
 }
