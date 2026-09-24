@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '24.x' }
       - run: npm ci
-      - run: npm pack --workspace @decisis/core --workspace @decisis/mcp --pack-destination /tmp/packed
+      - run: mkdir -p /tmp/packed && npm pack --workspace @decisis/core --workspace @decisis/mcp --pack-destination /tmp/packed
       - name: install the tarballs into a clean project and use them
         run: |
           mkdir -p /tmp/consumer && cd /tmp/consumer
