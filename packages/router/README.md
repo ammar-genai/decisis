@@ -80,6 +80,17 @@ Everything in `src/config.mjs` `DEFAULT_CONFIG` can be overridden (objects deep-
 
 `eval/tasks.mjs` has 30 hand-labelled tasks for an imaginary e-commerce monorepo: 10 mechanical, 12 normal and 8 hard. Each has an ideal tier and a set of acceptable tiers. Run it with `npm run eval -- --runs 3` (costs about $0.003).
 
+`--decider` swaps the model answering the questions, so the deciders are comparable on one set:
+
+```sh
+node eval/run-eval.mjs                      # Jev through OpenRouter (default)
+node eval/run-eval.mjs --decider claude:sonnet   # the Claude Code CLI, no API key
+node eval/run-eval.mjs --decider local           # a small model on this machine, no key, no network
+node eval/run-eval.mjs --decider llm:<model>     # any OpenRouter chat model
+```
+
+The local decider needs `npm install @huggingface/transformers` and reads its phrasings from `eval/local-labels.mjs`; see [`@decisis/local`](../local) for why those exist.
+
 | 3 runs × 30 tasks | acceptable | ideal | **under-routed** | over-routed |
 |---|---|---|---|---|
 | Jev pick alone | 87/90 | 84/90 | 3 | 0 |

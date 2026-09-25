@@ -1,0 +1,43 @@
+{
+  "name": "@decisis/local",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A decider that runs on your own machine: a small NLI model answers typed questions with no API key and no network after the first download.",
+  "type": "module",
+  "bin": {
+    "decisis-local": "bin/decisis-local.mjs"
+  },
+  "files": [
+    "README.md",
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test 'test/*.test.mjs'"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "@decisis/core": "*"
+  },
+  "peerDependencies": {
+    "@huggingface/transformers": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@huggingface/transformers": {
+      "optional": true
+    }
+  },
+  "author": "Ammar Bin Ayaz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ammar-genai/decisis.git",
+    "directory": "packages/local"
+  },
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "main": "./src/index.mjs"
+}

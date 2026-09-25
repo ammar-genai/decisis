@@ -48,6 +48,7 @@ Agents and pipelines make the same three moves over and over: *is this worth act
 | [`@decisis/router`](packages/router) | A strong model plans, a fast model routes each task to a model tier, tasks run through the Claude Code CLI | **0.1.0** |
 | [`@decisis/shadow`](packages/shadow) | Watch a system that already decides, record what the model *would* have decided, report the disagreements | **0.1.0** |
 | [`@decisis/mcp`](packages/mcp) | MCP server: `classify`, `decide` and `route_model` as tools for any agent | **0.1.0** |
+| [`@decisis/local`](packages/local) | A decider that runs on your own machine: no API key, no network, deterministic | **0.1.0** |
 
 ## For agents
 
@@ -81,11 +82,14 @@ The decisions model was right, six times faster and cheaper.
 
 The same 30-task routing set, three deciders, one policy (`packages/router/eval`, `--decider`):
 
-| Decider | Acceptable, alone | Under-routed, alone | With policy floors | Latency p50 |
-|---|---|---|---|---|
-| Jev 1.13 (OpenRouter) | 29/30 | 1 | **30/30**, 0 under | **0.3 s** |
-| Claude Code · Haiku (no key) | 22/30 | 8 | 28/30, 2 under | 12.9 s |
-| Claude Code · Sonnet (no key) | **30/30** | 0 | 30/30, 0 under | 6.5 s |
+| Decider | Acceptable, alone | Under-routed, alone | With policy floors | Latency p50 | Cost |
+|---|---|---|---|---|---|
+| Jev 1.13 (OpenRouter) | 29/30 | 1 | **30/30**, 0 under | **0.3 s** | $0.00002 |
+| Claude Code · Sonnet (no key) | **30/30** | 0 | 30/30, 0 under | 6.5 s | subscription |
+| Claude Code · Haiku (no key) | 22/30 | 8 | 28/30, 2 under | 12.9 s | subscription |
+| Local NLI model (no key, offline) | 23/30 | 2 | 22/30, 1 under | 0.27 s | **$0** |
+
+The local model is the only deterministic row: two runs returned identical answers on all 30 tasks.
 
 Two things to take from that. The floors earn their keep: they turned Haiku's 8 under-routes into 2. And the two it could not rescue were both cases where Haiku, asked which model a task needed, confidently chose itself - a model is a poor judge of whether the work is beyond it, so if you route with the CLI, judge with a tier above the cheapest one you might pick.
 
@@ -93,7 +97,7 @@ Through the MCP server, live: a CI failure reading "connection reset talking to 
 
 **What that number is, and is not.** The evaluation scores agreement with hand-written labels and prices the chosen tiers with fixed per-tier weights. It does not execute the tasks, so it does not measure whether the cheaper tier actually finished the work, how often a task needed a retry, or the real dollar total. Read it as a routing-agreement result. The labels are mine; re-run them yourself, or relabel them, with the packaged evaluation set.
 
-## No API key? Use the CLI you already have
+## No API key? Two ways
 
 ```ts
 import { claudeCodeDecider } from '@decisis/core';
@@ -101,6 +105,15 @@ const decide = claudeCodeDecider({ model: 'sonnet' });   // runs `claude -p --js
 ```
 
 It costs no money, only your plan's usage window (each call carries Claude Code's own prompt overhead), and it takes seconds rather than milliseconds. For the MCP server: `DECISIS_DECIDER=claude DECISIS_MODEL=sonnet`.
+
+Or run a small model on your own machine, which needs no account at all and works offline:
+
+```ts
+import { localDecider } from '@decisis/local';
+const decide = localDecider({ focus: ['task'] });        // ~270 ms, $0, deterministic
+```
+
+It is less accurate than either of the above (23/30 on the routing set), so read [`@decisis/local`](packages/local) before relying on it. It is the right choice when a decision must be free, private, offline or repeatable.
 
 ## When not to use this
 

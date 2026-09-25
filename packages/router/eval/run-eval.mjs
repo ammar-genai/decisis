@@ -9,15 +9,24 @@ import cases, { PROJECT } from './tasks.mjs';
 
 const { values: v } = parseArgs({ options: { runs: { type: 'string' }, verbose: { type: 'boolean' }, decider: { type: 'string' }, concurrency: { type: 'string' } } });
 // --decider jev (default) | claude:<model> (Claude Code CLI, no key needed) | llm:<openrouter model>
+//           | local[:<hf model>] (a small NLI model on this machine: no key, no network after download)
 const which = v.decider ?? 'jev';
 const RUNS = Number(v.runs ?? 1);
 const key = loadKey('OPENROUTER_API_KEY', { files: [new URL('../.env', import.meta.url).pathname, new URL('../../../.env', import.meta.url).pathname] });
-if (!key && !which.startsWith('claude')) {
+if (!key && !which.startsWith('claude') && !which.startsWith('local')) {
   console.error('No OPENROUTER_API_KEY found.');
   process.exit(1);
 }
-const decideImpl = which.startsWith('claude:') ? claudeCodeDecider({ model: which.slice(7) }) : which.startsWith('llm:') ? llmDecider({ key, model: which.slice(4) }) : undefined;
-const CONCURRENCY = Number(v.concurrency ?? (which.startsWith('claude') ? 4 : 30));
+const localModel = which === 'local' ? undefined : which.startsWith('local:') ? which.slice(6) : null;
+const decideImpl = which.startsWith('claude:')
+  ? claudeCodeDecider({ model: which.slice(7) })
+  : which.startsWith('llm:')
+    ? llmDecider({ key, model: which.slice(4) })
+    : localModel !== null
+      ? (await import('@decisis/local')).localDecider({ ...(localModel ? { model: localModel } : {}), focus: ['task'], labels: (await import('./local-labels.mjs')).LOCAL_LABELS })
+      : undefined;
+// The local model is one CPU-bound process: parallelism does not help and distorts the timings.
+const CONCURRENCY = Number(v.concurrency ?? (which.startsWith('claude') ? 4 : which.startsWith('local') ? 1 : 30));
 async function mapLimit(items, n, fn) {
   const out = new Array(items.length);
   let i = 0;
